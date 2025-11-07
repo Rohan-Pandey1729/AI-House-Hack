@@ -129,26 +129,41 @@ st.markdown("""
 st.markdown("""
     <script>
     (function () {
-        const applyTitles = () => {
-            const selectorMap = [
-                'section[data-testid="stSidebar"] div[data-baseweb="tag"]',
-                'section[data-testid="stSidebar"] li[data-baseweb="menu-item"]'
-            ];
-            selectorMap.forEach(selector => {
-                document.querySelectorAll(selector).forEach(node => {
-                    const text = node.textContent.trim();
-                    if (text && node.getAttribute('title') !== text) {
-                        node.setAttribute('title', text);
-                    }
-                });
+        const SHORT_LIMIT = 12;
+
+        const applyEnhancements = () => {
+            const chipSelector = 'section[data-testid="stSidebar"] div[data-baseweb="tag"] span';
+            document.querySelectorAll(chipSelector).forEach(node => {
+                const text = node.textContent.trim();
+                if (!text) return;
+
+                if (!node.dataset.fullLabel) {
+                    node.dataset.fullLabel = text;
+                }
+                const full = node.dataset.fullLabel;
+                node.setAttribute('title', full);
+
+                if (full.length > SHORT_LIMIT) {
+                    node.textContent = full.slice(0, SHORT_LIMIT).trimEnd() + '…';
+                } else {
+                    node.textContent = full;
+                }
+            });
+
+            const optionSelector = 'section[data-testid="stSidebar"] li[data-baseweb="menu-item"] span';
+            document.querySelectorAll(optionSelector).forEach(node => {
+                const text = node.textContent.trim();
+                if (text) {
+                    node.setAttribute('title', text);
+                }
             });
         };
 
         const observer = new MutationObserver(() => {
-            applyTitles();
+            applyEnhancements();
         });
         observer.observe(document.body, { childList: true, subtree: true });
-        applyTitles();
+        applyEnhancements();
     })();
     </script>
 """, unsafe_allow_html=True)
