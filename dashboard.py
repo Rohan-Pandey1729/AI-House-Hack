@@ -59,8 +59,8 @@ st.markdown("""
         line-height: 1.5;
     }
     section[data-testid="stSidebar"] [data-testid="stExpander"] {
-        background: rgba(255, 255, 255, 0.02);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: linear-gradient(165deg, rgba(94, 179, 255, 0.18), rgba(11, 19, 40, 0.92));
+        border: 1px solid rgba(143, 211, 255, 0.25);
         border-radius: 16px;
         margin-bottom: 1rem;
         backdrop-filter: blur(10px);
@@ -111,14 +111,24 @@ st.markdown("""
     }
     section[data-testid="stSidebar"] [data-baseweb="tag"] {
         max-width: 100%;
-        padding-right: 28px;
+        padding-right: 20px;
+        font-size: 0.75rem;
+        line-height: 1.2;
+        background: linear-gradient(125deg, #8fd3ff, #4da6ff);
+        color: #041428;
+        border: none;
+        box-shadow: 0 6px 16px rgba(11, 32, 82, 0.35);
     }
     section[data-testid="stSidebar"] [data-baseweb="tag"] span {
         max-width: 100%;
         display: inline-block;
         overflow: hidden;
-        text-overflow: ellipsis;
+        text-overflow: clip;
         white-space: nowrap;
+        letter-spacing: 0.02em;
+    }
+    section[data-testid="stSidebar"] [data-baseweb="tag"] svg {
+        color: #041428;
     }
     section[data-testid="stSidebar"] [role="option"] span {
         white-space: normal;
@@ -129,7 +139,7 @@ st.markdown("""
 st.markdown("""
     <script>
     (function () {
-        const SHORT_LIMIT = 12;
+        const SHORT_LIMIT = 18;
 
         const applyEnhancements = () => {
             const chipSelector = 'section[data-testid="stSidebar"] div[data-baseweb="tag"] span';
