@@ -109,8 +109,49 @@ st.markdown("""
         margin-top: 0.15rem;
         color: rgba(255, 255, 255, 0.85);
     }
+    section[data-testid="stSidebar"] [data-baseweb="tag"] {
+        max-width: 100%;
+        padding-right: 28px;
+    }
+    section[data-testid="stSidebar"] [data-baseweb="tag"] span {
+        max-width: 100%;
+        display: inline-block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    section[data-testid="stSidebar"] [role="option"] span {
+        white-space: normal;
+    }
     </style>
     """, unsafe_allow_html=True)
+
+st.markdown("""
+    <script>
+    (function () {
+        const applyTitles = () => {
+            const selectorMap = [
+                'section[data-testid="stSidebar"] div[data-baseweb="tag"]',
+                'section[data-testid="stSidebar"] li[data-baseweb="menu-item"]'
+            ];
+            selectorMap.forEach(selector => {
+                document.querySelectorAll(selector).forEach(node => {
+                    const text = node.textContent.trim();
+                    if (text && node.getAttribute('title') !== text) {
+                        node.setAttribute('title', text);
+                    }
+                });
+            });
+        };
+
+        const observer = new MutationObserver(() => {
+            applyTitles();
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+        applyTitles();
+    })();
+    </script>
+""", unsafe_allow_html=True)
 
 # Title
 st.title("🏙️ Seattle Customer Service Requests Dashboard")
