@@ -6,6 +6,8 @@ import plotly.graph_objects as go
 import json
 from datetime import datetime, timedelta
 import numpy as np
+import gzip
+from pathlib import Path
 
 # Page configuration
 st.set_page_config(
@@ -183,12 +185,26 @@ st.title("🏙️ Seattle Customer Service Requests Dashboard")
 st.markdown("**Interactive analytics for Seattle's customer service data (2024-2025)**")
 
 # Data loading with caching
+DATA_JSON = Path("seattle_requests_2024_2025.json")
+DATA_JSON_GZ = Path("seattle_requests_2024_2025.json.gz")
+
+
 @st.cache_data
 def load_data():
     """Load and prepare the customer service requests data."""
     try:
-        with open('seattle_requests_2024_2025.json', 'r') as f:
-            data = json.load(f)
+        data = None
+        if DATA_JSON.exists():
+            with open(DATA_JSON, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+        elif DATA_JSON_GZ.exists():
+            with gzip.open(DATA_JSON_GZ, 'rt', encoding='utf-8') as f:
+                data = json.load(f)
+        else:
+            raise FileNotFoundError(
+                "Neither 'seattle_requests_2024_2025.json' nor "
+                "'seattle_requests_2024_2025.json.gz' was found."
+            )
 
         # Extract the data array from the JSON object
         df = pd.DataFrame(data['data'])
