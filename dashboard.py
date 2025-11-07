@@ -632,7 +632,7 @@ seabot_widget = """
   function greetIfNeeded() {
     if (greeted) return;
     greeted = true;
-    addMessage('Hi there! I\'m SeaBot. I can point you to City of Seattle tools, request forms, and tips for using this dashboard.', 'bot');
+    addMessage("Hi there! I'm SeaBot. I can point you to City of Seattle tools, request forms, and tips for using this dashboard.", 'bot');
     addMessage('Ask me how to submit a service request or tap one of the quick suggestions below.', 'bot');
   }
 
