@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Simple HTTP server to view the Seattle Customer Service visualization.
-Run this script and open http://localhost:8000/visualization.html in your browser.
+Run this script and open http://localhost:8000/index.html in your browser.
 """
 
 import http.server
@@ -11,6 +11,7 @@ import os
 from pathlib import Path
 
 PORT = 8000
+ENTRY_FILE = "index.html"
 
 class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
     def end_headers(self):
@@ -31,18 +32,18 @@ def main():
     print("Seattle Customer Service Requests - 3D Visualization Server")
     print("="*60)
     print(f"\nStarting server on port {PORT}...")
-    print(f"URL: http://localhost:{PORT}/visualization.html")
+    print(f"URL: http://localhost:{PORT}/{ENTRY_FILE}")
     print("\nPress Ctrl+C to stop the server")
     print("="*60 + "\n")
 
     with socketserver.TCPServer(("", PORT), MyHTTPRequestHandler) as httpd:
         # Try to open browser automatically
         try:
-            webbrowser.open(f'http://localhost:{PORT}/visualization.html')
+            webbrowser.open(f'http://localhost:{PORT}/{ENTRY_FILE}')
             print("Opening browser automatically...\n")
         except:
             print("Could not open browser automatically.")
-            print(f"Please open http://localhost:{PORT}/visualization.html manually\n")
+            print(f"Please open http://localhost:{PORT}/{ENTRY_FILE} manually\n")
 
         try:
             httpd.serve_forever()

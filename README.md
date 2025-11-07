@@ -115,7 +115,7 @@ The project also includes a standalone HTML visualization:
 python serve.py
 ```
 
-This will start a local server and open `visualization.html` with the 3D heatmap.
+This will start a local server and open `index.html` with the 3D heatmap.
 
 ## Dashboard Navigation
 
@@ -144,12 +144,33 @@ customer_service_hackathon/
 ├── dashboard.py                              # Streamlit dashboard (new)
 ├── requirements.txt                          # Python dependencies (new)
 ├── README.md                                 # This file (new)
-├── visualization.html                        # Original 3D heatmap
+├── index.html                                 # Standalone Deck.gl map (GitHub Pages friendly)
 ├── prepare_data.py                           # Data preprocessing script
 ├── serve.py                                  # Local HTTP server
 ├── seattle_requests_2024_2025.json           # Processed data (581K records)
 └── Customer_Service_Requests_20251104.csv    # Raw data (2.2M records)
 ```
+
+## Deploying to GitHub Pages
+
+1. **Commit the static assets**
+   - Ensure `index.html` and `seattle_requests_2024_2025.json` live at the repo root (already configured).
+   - Commit and push changes to your `main` branch.
+
+2. **Enable Pages**
+   - In GitHub, go to **Settings → Pages**.
+   - Under *Build and deployment*, choose `Deploy from a branch`.
+   - Select `main` and the `/ (root)` folder, then click **Save**.
+
+3. **Visit the site**
+   - After GitHub finishes the build (usually <1 minute), the heatmap is available at  
+     `https://<username>.github.io/<repo-name>/`.
+   - The Deck.gl view fetches the JSON relative to the page, so no extra configuration is required.
+
+4. **Optional: Custom domain**
+   - Add a `CNAME` file with your domain and update DNS per GitHub’s docs if you want vanity hosting.
+
+Whenever you rerun `prepare_data.py`, commit both the refreshed JSON and any HTML tweaks so Pages serves the latest state.
 
 ## Data Preprocessing
 

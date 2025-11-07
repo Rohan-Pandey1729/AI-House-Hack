@@ -499,11 +499,11 @@ st.markdown("---")
 st.subheader("🗺️ Interactive Heatmap")
 st.markdown("**3D density heatmap with interactive controls showing request concentrations across Seattle**")
 
-# Load and embed the visualization.html with inline filtered data
-with open('visualization.html', 'r', encoding='utf-8') as f:
+# Load and embed the static Deck.gl page with inline filtered data
+with open('index.html', 'r', encoding='utf-8') as f:
     html_content = f.read()
 
-# Convert filtered dataframe to the format expected by visualization.html
+# Convert filtered dataframe to the format expected by the static page
 map_data = filtered_df[['lat', 'lon', 'type', 'department', 'date', 'status', 'community']].copy()
 map_data['date'] = map_data['date'].dt.strftime('%Y-%m-%d')
 
