@@ -161,6 +161,182 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+
+    #chat-launcher {
+      position: fixed;
+      bottom: 32px;
+      right: 32px;
+      background: linear-gradient(135deg, #4da6ff, #1e75ff);
+      color: #fff;
+      border: none;
+      border-radius: 18px;
+      padding: 14px 22px;
+      min-width: 190px;
+      min-height: 56px;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+      cursor: pointer;
+      z-index: 2500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    #chat-launcher .chat-icon {
+      font-size: 20px;
+    }
+
+    #chat-launcher .chat-label {
+      font-size: 14px;
+    }
+
+    #chat-panel {
+      position: fixed;
+      bottom: 120px;
+      right: 40px;
+      width: 380px;
+      min-height: 420px;
+      max-height: 70vh;
+      background: rgba(13, 18, 28, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 18px;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.65);
+      display: none;
+      flex-direction: column;
+      z-index: 2600;
+      backdrop-filter: blur(10px);
+    }
+
+    #chat-panel.open {
+      display: flex;
+    }
+
+    .chat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .chat-header h2 {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    #chat-close {
+      background: transparent;
+      border: none;
+      color: #aaa;
+      font-size: 18px;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    #chat-messages {
+      padding: 16px;
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .chat-message {
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.4;
+      max-width: 90%;
+    }
+
+    .chat-message.bot {
+      align-self: flex-start;
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+    }
+
+    .chat-message.user {
+      align-self: flex-end;
+      background: #4da6ff;
+      color: #fff;
+    }
+
+    .chat-suggestions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 0 16px 10px;
+    }
+
+    .chat-suggestions button {
+      flex: 1 1 45%;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 999px;
+      background: transparent;
+      color: #fff;
+      font-size: 11px;
+      padding: 6px 8px;
+      cursor: pointer;
+    }
+
+    #chat-form {
+      display: flex;
+      gap: 8px;
+      padding: 12px 16px 16px;
+    }
+
+    #chat-input {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 12px;
+      padding: 8px 10px;
+      color: #fff;
+      font-size: 13px;
+    }
+
+    #chat-form button[type="submit"] {
+      background: #4da6ff;
+      border: none;
+      color: #fff;
+      border-radius: 10px;
+      padding: 0 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
+
+    @media (max-width: 640px) {
+      #chat-panel {
+        right: 12px;
+        bottom: 100px;
+        width: calc(100vw - 32px);
+        max-height: 65vh;
+      }
+
+      #chat-launcher {
+        right: 12px;
+        bottom: 24px;
+        min-width: 160px;
+        padding: 12px 18px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -236,6 +412,30 @@
     </p>
   </div>
 
+  <button id="chat-launcher" aria-haspopup="dialog" aria-expanded="false">
+    <span aria-hidden="true" class="chat-icon">💬</span>
+    <span class="chat-label">City Services Assistant</span>
+    <span class="sr-only">Open City Services Assistant</span>
+  </button>
+
+  <section id="chat-panel" aria-label="City services assistant" role="dialog" aria-modal="false">
+    <div class="chat-header">
+      <h2>City Services Assistant</h2>
+      <button id="chat-close" aria-label="Close chat">×</button>
+    </div>
+    <div id="chat-messages" role="log" aria-live="polite"></div>
+    <div class="chat-suggestions">
+      <button type="button" data-message="How do I report a pothole?">Report pothole</button>
+      <button type="button" data-message="Where can I submit graffiti cleanup?">Graffiti cleanup</button>
+      <button type="button" data-message="How do I check a service request status?">Check status</button>
+      <button type="button" data-message="What filters can I use on the map?">Use map filters</button>
+    </div>
+    <form id="chat-form">
+      <input id="chat-input" type="text" placeholder="Ask how to submit a request..." autocomplete="off" aria-label="Chat message">
+      <button type="submit">Send</button>
+    </form>
+  </section>
+
   <script>
     const {MapboxOverlay} = deck;
     const {HeatmapLayer} = deck;
@@ -245,6 +445,41 @@
     let map;
     let deckOverlay;
     let stats = {};
+    const chatLauncher = document.getElementById('chat-launcher');
+    const chatPanel = document.getElementById('chat-panel');
+    const chatMessages = document.getElementById('chat-messages');
+    const chatForm = document.getElementById('chat-form');
+    const chatInput = document.getElementById('chat-input');
+    const chatClose = document.getElementById('chat-close');
+    const chatSuggestionButtons = document.querySelectorAll('.chat-suggestions button');
+    let hasGreetedUser = false;
+    const resourceGuides = [
+      {
+        keywords: ['pothole', 'street', 'road', 'asphalt'],
+        response: 'For potholes or street damage, open the Find It, Fix It portal (https://www.seattle.gov/customer-service-bureau/find-it-fix-it-mobile-app) and include the block you located on the heatmap. Transportation crews usually respond in 3–10 business days.',
+        isHTML: false
+      },
+      {
+        keywords: ['graffiti', 'tag', 'paint'],
+        response: 'Graffiti cleanup requests go to Seattle Public Utilities. Submit at https://my.seattle.gov/services/graffiti-report or dial 206-684-7587 if it is on private property.',
+        isHTML: false
+      },
+      {
+        keywords: ['trash', 'garbage', 'missed', 'recycling'],
+        response: 'For missed garbage, recycling, or food waste pickups, schedule through Solid Waste at https://myutilities.seattle.gov or call 206-684-3000. Mention the neighborhood cluster you spotted on the map to help routing.',
+        isHTML: false
+      },
+      {
+        keywords: ['light', 'streetlight', 'lamp'],
+        response: 'Streetlight outages are handled by Seattle City Light. Use https://citylight.seattle.gov/outages/report-streetlight-issue and drop a pin that matches the coordinates you inspected.',
+        isHTML: false
+      },
+      {
+        keywords: ['illegal dumping', 'dump', 'debris'],
+        response: 'Illegal dumping can be reported through Seattle Public Utilities at https://www.seattle.gov/utilities/protecting-our-environment/report-a-problem. Photos from the field plus a cross street from the map help inspectors.',
+        isHTML: false
+      }
+    ];
 
     // Seattle center coordinates
     const INITIAL_VIEW_STATE = {
@@ -406,6 +641,122 @@
         });
       }
     }
+
+    function addChatMessage(text, sender = 'bot', isHTML = false) {
+      if (!chatMessages) return;
+      const bubble = document.createElement('div');
+      bubble.className = `chat-message ${sender}`;
+      if (isHTML) {
+        bubble.innerHTML = text;
+      } else {
+        bubble.textContent = text;
+      }
+      chatMessages.appendChild(bubble);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function openChat(shouldGreet = false) {
+      if (!chatPanel) return;
+      chatPanel.classList.add('open');
+      chatLauncher.setAttribute('aria-expanded', 'true');
+      if (shouldGreet) {
+        greetUser();
+      }
+    }
+
+    function closeChat() {
+      if (!chatPanel) return;
+      chatPanel.classList.remove('open');
+      chatLauncher.setAttribute('aria-expanded', 'false');
+    }
+
+    function greetUser() {
+      if (hasGreetedUser) return;
+      hasGreetedUser = true;
+      addChatMessage('Hi! I can point you to the right City of Seattle tool and show how to use this map to plan requests.', 'bot');
+      addChatMessage('Try asking “How do I report a pothole?” or tap a quick suggestion below.', 'bot');
+    }
+
+    function handleUserMessage(message) {
+      const trimmed = message.trim();
+      if (!trimmed) return;
+      addChatMessage(trimmed, 'user');
+      chatInput.value = '';
+      const reply = getBotResponse(trimmed);
+      setTimeout(() => {
+        addChatMessage(reply.text, 'bot', reply.isHTML);
+      }, 300);
+    }
+
+    function getBotResponse(message) {
+      const normalized = message.toLowerCase();
+      const match = resourceGuides.find(guide =>
+        guide.keywords.some(keyword => normalized.includes(keyword))
+      );
+
+      if (match) {
+        return {text: match.response, isHTML: !!match.isHTML};
+      }
+
+      if (normalized.includes('status') || normalized.includes('track')) {
+        return {
+          text: 'Status checks live in the Seattle Customer Service Portal (https://srhub.seattle.gov). Use your SR number or call 206-684-2489 for live help.',
+          isHTML: false
+        };
+      }
+
+      if (normalized.includes('filter') || normalized.includes('layer') || normalized.includes('map')) {
+        return {
+          text: 'Use the sliders on the left to change intensity, radius, and thresholds. Drop-down filters narrow by request type or status so you can zoom to the exact service you want to file.',
+          isHTML: false
+        };
+      }
+
+      if (normalized.includes('submit') || normalized.includes('request') || normalized.includes('help')) {
+        return {
+          text: 'Pick the request type shown in the info panel, then tap the matching option in Find It, Fix It or call the City Service Bureau at 206-684-2489. Include the cross streets you spotted on the map for a faster dispatch.',
+          isHTML: false
+        };
+      }
+
+      if (normalized.includes('data') || normalized.includes('download') || normalized.includes('csv')) {
+        return {
+          text: 'Need the dataset? Run python3 prepare_data.py to regenerate seattle_requests_2024_2025.json, then fetch it from your local server at http://localhost:8000/seattle_requests_2024_2025.json.',
+          isHTML: false
+        };
+      }
+
+      return {
+        text: 'I can help with potholes, graffiti, trash, lighting, illegal dumping, request status, and map usage. Try asking a more specific question or share the service you want to request.',
+        isHTML: false
+      };
+    }
+
+    if (chatForm) {
+      chatForm.addEventListener('submit', event => {
+        event.preventDefault();
+        handleUserMessage(chatInput.value);
+      });
+    }
+
+    chatLauncher.addEventListener('click', () => {
+      const isOpen = chatPanel.classList.contains('open');
+      if (isOpen) {
+        closeChat();
+      } else {
+        openChat(true);
+      }
+    });
+
+    chatClose.addEventListener('click', closeChat);
+
+    chatSuggestionButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        openChat(true);
+        handleUserMessage(button.dataset.message || button.textContent);
+      });
+    });
+
   </script>
 </body>
 </html>

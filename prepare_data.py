@@ -12,7 +12,7 @@ def prepare_data():
     print("Loading CSV data...")
 
     # Load the CSV file
-    df = pd.read_csv('Customer_Service_Requests_20251104.csv')
+    df = pd.read_csv('Customer_Service_Requests_20251106.csv')
 
     print(f"Total records loaded: {len(df):,}")
 
