@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset='utf-8'>
+  <title>Seattle Customer Service Requests 2024-2025 - Heatmap</title>
+  <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no'>
+  <script src='https://unpkg.com/deck.gl@latest/dist.min.js'></script>
+  <script src='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js'></script>
+  <link href='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css' rel='stylesheet' />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      overflow: hidden;
+    }
+    #container {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+      background: transparent;
+    }
+    #container canvas {
+      background: transparent !important;
+    }
+    #info-panel {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 20px;
+      border-radius: 8px;
+      max-width: 350px;
+      z-index: 1000;
+      backdrop-filter: blur(10px);
+    }
+    #info-panel h1 {
+      margin: 0 0 10px 0;
+      font-size: 20px;
+      font-weight: 600;
+    }
+    #info-panel h2 {
+      margin: 15px 0 8px 0;
+      font-size: 14px;
+      font-weight: 600;
+      color: #4da6ff;
+    }
+    #info-panel p {
+      margin: 5px 0;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .stat {
+      display: flex;
+      justify-content: space-between;
+      margin: 4px 0;
+      font-size: 12px;
+    }
+    .stat-label {
+      color: #aaa;
+    }
+    .stat-value {
+      font-weight: 600;
+      color: #fff;
+    }
+    #controls {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 15px;
+      border-radius: 8px;
+      z-index: 1000;
+      backdrop-filter: blur(10px);
+    }
+    #controls h2 {
+      margin: 0 0 10px 0;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .control-group {
+      margin: 10px 0;
+    }
+    .control-group label {
+      display: block;
+      font-size: 11px;
+      color: #aaa;
+      margin-bottom: 5px;
+    }
+    .control-group input[type="range"] {
+      width: 200px;
+    }
+    .control-group select {
+      width: 100%;
+      padding: 5px;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+      font-size: 12px;
+    }
+    #legend {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 15px;
+      border-radius: 8px;
+      z-index: 1000;
+      backdrop-filter: blur(10px);
+    }
+    #legend h2 {
+      margin: 0 0 10px 0;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .gradient {
+      width: 292px;
+      height: 20px;
+      background: linear-gradient(to right,
+        rgb(119, 0, 255),
+        rgb(0, 195, 255),
+        rgb(0, 255, 153),
+        rgb(255, 238, 0),
+        rgb(255, 0, 0)
+      );
+      border-radius: 4px;
+      margin: 10px 0;
+    }
+    .gradient-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #aaa;
+    }
+    #loading {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.9);
+      color: white;
+      padding: 30px 50px;
+      border-radius: 8px;
+      font-size: 18px;
+      z-index: 2000;
+    }
+    .spinner {
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top: 3px solid white;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 15px;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div id="container"></div>
+
+  <div id="loading">
+    <div class="spinner"></div>
+    Loading data...
+  </div>
+
+  <div id="info-panel" style="display:none;">
+    <h1>Seattle Service Requests</h1>
+    <p style="color: #aaa; margin-bottom: 15px;">Heatmap Visualization (2024-2025)</p>
+
+    <h2>Dataset</h2>
+    <div class="stat">
+      <span class="stat-label">Total Requests:</span>
+      <span class="stat-value" id="total-records">-</span>
+    </div>
+    <div class="stat">
+      <span class="stat-label">Date Range:</span>
+      <span class="stat-value" id="date-range">-</span>
+    </div>
+
+    <h2>Top Request Types</h2>
+    <div id="top-types"></div>
+
+    <h2>Instructions</h2>
+    <p style="font-size: 11px; color: #aaa;">
+      • <strong>Pan:</strong> Click and drag<br>
+      • <strong>Zoom:</strong> Scroll wheel<br>
+      • Hotter colors = more requests
+    </p>
+  </div>
+
+  <div id="controls" style="display:none;">
+    <h2>Controls</h2>
+    <div class="control-group">
+      <label>Intensity: <span id="intensity-value">1.0</span></label>
+      <input type="range" id="intensity-slider" min="0.1" max="3" value="1" step="0.1">
+    </div>
+    <div class="control-group">
+      <label>Radius: <span id="radius-value">30</span>px</label>
+      <input type="range" id="radius-slider" min="10" max="100" value="30" step="5">
+    </div>
+    <div class="control-group">
+      <label>Threshold: <span id="threshold-value">0.05</span></label>
+      <input type="range" id="threshold-slider" min="0" max="0.5" value="0.05" step="0.01">
+    </div>
+    <div class="control-group">
+      <label>Filter by Type:</label>
+      <select id="type-filter">
+        <option value="all">All Request Types</option>
+      </select>
+    </div>
+    <div class="control-group">
+      <label>Filter by Status:</label>
+      <select id="status-filter">
+        <option value="all">All Statuses</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="legend" style="display:none;">
+    <h2>Density</h2>
+    <div class="gradient"></div>
+    <div class="gradient-labels">
+      <span>Low</span>
+      <span>High</span>
+    </div>
+    <p style="font-size: 11px; color: #aaa; margin: 10px 0 0 0;">
+      Color intensity shows concentration of service requests
+    </p>
+  </div>
+
+  <script>
+    const {MapboxOverlay} = deck;
+    const {HeatmapLayer} = deck;
+
+    let allData = [];
+    let currentData = [];
+    let map;
+    let deckOverlay;
+    let stats = {};
+
+    // Seattle center coordinates
+    const INITIAL_VIEW_STATE = {
+      longitude: -122.3321,
+      latitude: 47.6062,
+      zoom: 11,
+      pitch: 0,
+      bearing: 0,
+      maxZoom: 16,
+      minZoom: 9
+    };
+
+    // color scheme (low to high density)
+    const COLOR_RANGE = [
+      [119, 0, 255, 95],
+      [0, 195, 255, 99],
+      [0, 255, 153],
+      [255, 238, 0],
+      [255, 0, 0],
+    ];
+
+    // Load data
+    fetch('seattle_requests_2024_2025.json')
+      .then(response => response.json())
+      .then(json => {
+        allData = json.data;
+        currentData = allData;
+        stats = json.stats;
+
+        // Hide loading, show UI
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('info-panel').style.display = 'block';
+        document.getElementById('controls').style.display = 'block';
+        document.getElementById('legend').style.display = 'block';
+
+        // Populate stats
+        document.getElementById('total-records').textContent = stats.total_records.toLocaleString();
+        document.getElementById('date-range').textContent =
+          `${stats.date_range.start} to ${stats.date_range.end}`;
+
+        // Populate top types
+        const topTypesDiv = document.getElementById('top-types');
+        const topTypes = Object.entries(stats.top_request_types).slice(0, 5);
+        topTypesDiv.innerHTML = topTypes.map(([type, count]) => `
+          <div class="stat">
+            <span class="stat-label" style="font-size: 11px; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${type}">${type}</span>
+            <span class="stat-value">${count.toLocaleString()}</span>
+          </div>
+        `).join('');
+
+        // Populate type filter dropdown
+        const typeFilter = document.getElementById('type-filter');
+        const allTypes = [...new Set(allData.map(d => d.type))].sort();
+        allTypes.forEach(type => {
+          const option = document.createElement('option');
+          option.value = type;
+          option.textContent = type;
+          typeFilter.appendChild(option);
+        });
+
+        // Populate status filter dropdown
+        const statusFilter = document.getElementById('status-filter');
+        const allStatuses = [...new Set(allData.map(d => d.status))].sort();
+        allStatuses.forEach(status => {
+          const option = document.createElement('option');
+          option.value = status;
+          option.textContent = status;
+          statusFilter.appendChild(option);
+        });
+
+        // Initialize visualization
+        initDeck();
+      })
+      .catch(err => {
+        document.getElementById('loading').innerHTML = '<div style="color: #ff4444;">Error loading data: ' + err.message + '</div>';
+      });
+
+    function initDeck() {
+      // Initialize Mapbox map
+      mapboxgl.accessToken = 'pk.eyJ1IjoiZXJpY3k0IiwiYSI6ImNtaG14ODczaTFwYXkycnB0azI5eGF0bjgifQ.Gwv4jC4Je1pJnHKsirVb_g'; // Public Mapbox token
+      map = new mapboxgl.Map({
+        container: 'container',
+        style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+        center: [INITIAL_VIEW_STATE.longitude, INITIAL_VIEW_STATE.latitude],
+        zoom: INITIAL_VIEW_STATE.zoom,
+        pitch: INITIAL_VIEW_STATE.pitch,
+        bearing: INITIAL_VIEW_STATE.bearing
+      });
+
+      // Create deck.gl overlay
+      deckOverlay = new MapboxOverlay({
+        layers: [createHeatmapLayer()]
+      });
+
+      map.addControl(deckOverlay);
+
+      // Set up controls
+      document.getElementById('intensity-slider').addEventListener('input', e => {
+        document.getElementById('intensity-value').textContent = e.target.value;
+        updateLayers();
+      });
+
+      document.getElementById('radius-slider').addEventListener('input', e => {
+        document.getElementById('radius-value').textContent = e.target.value;
+        updateLayers();
+      });
+
+      document.getElementById('threshold-slider').addEventListener('input', e => {
+        document.getElementById('threshold-value').textContent = e.target.value;
+        updateLayers();
+      });
+
+      document.getElementById('type-filter').addEventListener('change', e => {
+        applyFilters();
+      });
+
+      document.getElementById('status-filter').addEventListener('change', e => {
+        applyFilters();
+      });
+    }
+
+    function applyFilters() {
+      const typeValue = document.getElementById('type-filter').value;
+      const statusValue = document.getElementById('status-filter').value;
+
+      currentData = allData.filter(d => {
+        const typeMatch = typeValue === 'all' || d.type === typeValue;
+        const statusMatch = statusValue === 'all' || d.status === statusValue;
+        return typeMatch && statusMatch;
+      });
+
+      updateLayers();
+    }
+
+    function createHeatmapLayer() {
+      const intensity = parseFloat(document.getElementById('intensity-slider').value);
+      const radiusPixels = parseInt(document.getElementById('radius-slider').value);
+      const threshold = parseFloat(document.getElementById('threshold-slider').value);
+
+      return new HeatmapLayer({
+        id: 'heatmap-layer',
+        data: currentData,
+        getPosition: d => [d.lon, d.lat],
+        getWeight: d => 1,
+        radiusPixels: radiusPixels,
+        intensity: intensity,
+        threshold: threshold,
+        colorRange: COLOR_RANGE,
+        aggregation: 'SUM',
+        weightsTextureSize: 512,
+        debounceTimeout: 500
+      });
+    }
+
+    function updateLayers() {
+      if (deckOverlay) {
+        deckOverlay.setProps({
+          layers: [createHeatmapLayer()]
+        });
+      }
+    }
+  </script>
+</body>
+</html>
