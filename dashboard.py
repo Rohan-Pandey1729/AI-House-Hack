@@ -38,6 +38,77 @@ st.markdown("""
     .stMetric [data-testid="stMetricDelta"] {
         color: #4da6ff !important;
     }
+    section[data-testid="stSidebar"] {
+        background: radial-gradient(circle at top, rgba(34, 65, 134, 0.35), rgba(5, 9, 18, 0.96));
+        color: #f2f5ff;
+        padding: 1.5rem 1.25rem 2rem;
+        box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.05);
+    }
+    section[data-testid="stSidebar"] > div {
+        color: inherit;
+    }
+    section[data-testid="stSidebar"] label {
+        color: #eef2ff !important;
+        font-weight: 500;
+        letter-spacing: 0.02em;
+    }
+    .sidebar-intro {
+        font-size: 0.9rem;
+        color: #c0c6e5;
+        margin-bottom: 1.2rem;
+        line-height: 1.5;
+    }
+    section[data-testid="stSidebar"] [data-testid="stExpander"] {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 16px;
+        margin-bottom: 1rem;
+        backdrop-filter: blur(10px);
+        overflow: hidden;
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
+    }
+    section[data-testid="stSidebar"] [data-testid="stExpander"] button {
+        color: #f2f5ff !important;
+        font-weight: 600;
+        letter-spacing: 0.03em;
+    }
+    section[data-testid="stSidebar"] input,
+    section[data-testid="stSidebar"] textarea,
+    section[data-testid="stSidebar"] [data-baseweb="select"] {
+        background-color: rgba(6, 11, 22, 0.85) !important;
+        border-radius: 10px !important;
+    }
+    section[data-testid="stSidebar"] .stCaption {
+        color: rgba(255, 255, 255, 0.7) !important;
+    }
+    .sidebar-summary-card {
+        margin-top: 1.2rem;
+        padding: 1.1rem;
+        border-radius: 18px;
+        background: linear-gradient(135deg, rgba(77, 166, 255, 0.18), rgba(84, 61, 201, 0.45));
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        text-align: center;
+        color: #eef2ff;
+        box-shadow: 0 18px 38px rgba(5, 9, 18, 0.45);
+    }
+    .sidebar-summary-card span {
+        display: block;
+        text-transform: uppercase;
+        font-size: 0.7rem;
+        letter-spacing: 0.2em;
+        color: rgba(255, 255, 255, 0.8);
+        margin-bottom: 0.4rem;
+    }
+    .sidebar-summary-card strong {
+        font-size: 1.8rem;
+        font-weight: 700;
+        display: block;
+    }
+    .sidebar-summary-card small {
+        display: block;
+        margin-top: 0.15rem;
+        color: rgba(255, 255, 255, 0.85);
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -84,18 +155,26 @@ if df.empty:
 st.success(f"✅ Loaded {len(df):,} customer service requests")
 
 # Sidebar filters
-st.sidebar.header("🔍 Filters")
+st.sidebar.markdown("## 🎛️ Filter Studio")
+st.sidebar.markdown(
+    "<p class='sidebar-intro'>Blend dates, departments, statuses, and neighborhoods to sculpt the story told on the right.</p>",
+    unsafe_allow_html=True
+)
 
 # Date range filter
 min_date = df['date'].min().date()
 max_date = df['date'].max().date()
 
-date_range = st.sidebar.date_input(
-    "Date Range",
-    value=(min_date, max_date),
-    min_value=min_date,
-    max_value=max_date
-)
+with st.sidebar.expander("📅 Date Range", expanded=True):
+    date_range = st.date_input(
+        "Date Range",
+        value=(min_date, max_date),
+        min_value=min_date,
+        max_value=max_date,
+        help="Drag or click to spotlight the exact time window you care about.",
+        label_visibility="collapsed"
+    )
+    st.caption(f"Available data spans {min_date:%b %d, %Y} → {max_date:%b %d, %Y}.")
 
 # Convert date_range to proper format
 if len(date_range) == 2:
@@ -105,37 +184,54 @@ else:
 
 # Department filter
 departments = sorted(df['department'].unique().tolist())
-selected_departments = st.sidebar.multiselect(
-    "Departments",
-    options=departments,
-    default=departments
-)
+with st.sidebar.expander("🏢 Departments", expanded=False):
+    selected_departments = st.multiselect(
+        "Departments",
+        options=departments,
+        default=departments,
+        placeholder="All departments",
+        label_visibility="collapsed"
+    )
+    st.caption(f"{len(selected_departments)} of {len(departments)} departments highlighted.")
 
 # Status filter
 statuses = sorted(df['status'].unique().tolist())
-selected_statuses = st.sidebar.multiselect(
-    "Status",
-    options=statuses,
-    default=statuses
-)
+with st.sidebar.expander("📋 Status", expanded=False):
+    selected_statuses = st.multiselect(
+        "Status",
+        options=statuses,
+        default=statuses,
+        placeholder="Any status",
+        label_visibility="collapsed"
+    )
+    st.caption("Compare open activity vs. resolved work by toggling stages.")
 
 # Request type filter
 request_types = sorted(df['type'].unique().tolist())
-selected_types = st.sidebar.multiselect(
-    "Request Types",
-    options=request_types,
-    default=request_types[:10] if len(request_types) > 10 else request_types,
-    help="Select request types to include"
-)
+default_types = request_types[:10] if len(request_types) > 10 else request_types
+with st.sidebar.expander("📝 Request Types", expanded=False):
+    selected_types = st.multiselect(
+        "Request Types",
+        options=request_types,
+        default=default_types,
+        help="Spotlight the most common service categories or niche issues.",
+        placeholder="Select request types",
+        label_visibility="collapsed"
+    )
+    st.caption(f"Showing {len(selected_types)} categories out of {len(request_types)} tracked.")
 
 # Community filter
 communities = sorted([c for c in df['community'].unique().tolist() if c != 'Unknown'])
-selected_communities = st.sidebar.multiselect(
-    "Communities/Neighborhoods",
-    options=communities,
-    default=communities,
-    help="Filter by specific neighborhoods"
-)
+with st.sidebar.expander("📍 Communities & Neighborhoods", expanded=False):
+    selected_communities = st.multiselect(
+        "Communities/Neighborhoods",
+        options=communities,
+        default=communities,
+        help="Zoom into the hubs you care about—Downtown, Capitol Hill, Ballard, and beyond.",
+        placeholder="All Seattle neighborhoods",
+        label_visibility="collapsed"
+    )
+    st.caption("Unknown areas remain in the totals to keep KPIs aligned with the map.")
 
 # Apply filters
 filtered_df = df[
@@ -147,7 +243,16 @@ filtered_df = df[
     ((df['community'].isin(selected_communities)) | (df['community'] == 'Unknown'))
 ]
 
-st.sidebar.markdown(f"**Filtered Records:** {len(filtered_df):,} / {len(df):,}")
+st.sidebar.markdown(
+    f"""
+    <div class="sidebar-summary-card">
+        <span>Filtered Records</span>
+        <strong>{len(filtered_df):,}</strong>
+        <small>of {len(df):,} total requests</small>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 # KPI Metrics
 st.markdown("---")
